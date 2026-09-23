@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Probie SDK event inspector</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui,sans-serif; color:#173c36; background:#f1f6f3; }
+    body { max-width:1000px; margin:0 auto; padding:48px 24px; }
+    header { margin-bottom:32px; } h1 { font-size:clamp(30px,5vw,48px); letter-spacing:-.04em; margin:16px 0; }
+    .label { font:12px ui-monospace,monospace; letter-spacing:.15em; text-transform:uppercase; color:#2e8b7a; }
+    p { line-height:1.6; max-width:680px; } .controls { display:flex; flex-wrap:wrap; gap:10px; margin:24px 0; }
+    button { font:inherit; border:1px solid #acc8ba; border-radius:8px; padding:11px 16px; background:white; color:#173c36; cursor:pointer; }
+    button:hover { background:#e1eee6; } button:focus-visible { outline:3px solid #2e8b7a; outline-offset:3px; }
+    #flush { background:#173c36; color:white; } #status { min-height:24px; }
+    .panel { background:white; border:1px solid #d7e4dc; border-radius:12px; overflow:hidden; }
+    .panel-head { display:flex; justify-content:space-between; padding:18px 24px; border-bottom:1px solid #d7e4dc; }
+    pre { padding:24px; margin:0; max-height:520px; overflow:auto; font:13px/1.6 ui-monospace,monospace; }
+    footer { margin-top:24px; font-size:13px; color:#526a61; }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="/docs/assets/probie.svg" width="66" height="42" alt="Probie" />
+    <p class="label">JavaScript SDK / local example</p>
+    <h1>See what the SDK captures.</h1>
+    <p>Trigger a browser signal, flush the queue, and inspect the received events.
+       All requests stay on this local server.</p>
+  </header>
+  <div class="controls" aria-label="Example actions">
+    <button id="error">Trigger JS error</button>
+    <button id="request">Fail a request</button>
+    <button id="navigate">Change route</button>
+    <button id="identify">Identify demo user</button>
+    <button id="reset">Reset identity</button>
+    <button id="flush">Flush events</button>
+  </div>
+  <p id="status" role="status">Collector initialized. An initial page view is queued.</p>
+  <section class="panel" aria-label="Received events">
+    <div class="panel-head"><strong>Event inspector</strong><span id="count">0 events</span></div>
+    <pre id="events">Waiting for a batch...</pre>
+  </section>
+  <footer>Demo token: pb_demo. Receiver: this machine. No Probie account required.</footer>
+  <script type="module">
+    import { init, identify, reset, flush } from "/dist/index.js";
+    const rawFetch = window.fetch.bind(window);
+    const status = document.querySelector("#status");
+    init({ token: "pb_demo", apiBase: location.origin });
+    document.querySelector("#error").onclick = () => { throw new Error("Probie demo: preview failed"); };
+    document.querySelector("#request").onclick = () => { void fetch("/demo/failure"); };
+    document.querySelector("#navigate").onclick = () => {
+      history.pushState({}, "", location.pathname === "/demo/next" ? "/examples/browser/" : "/demo/next");
+      status.textContent = "Path changed. A page view is queued.";
+    };
+    document.querySelector("#identify").onclick = () => { identify("demo_user_123"); status.textContent = "Future events belong to demo_user_123."; };
+    document.querySelector("#reset").onclick = () => { reset(); status.textContent = "Identity cleared. A new session has started."; };
+    document.querySelector("#flush").onclick = () => { flush(); status.textContent = "Delivery requested. The inspector updates automatically."; };
+    setInterval(async () => {
+      try {
+        const events = await (await rawFetch("/demo/events")).json();
+        document.querySelector("#count").textContent = `${events.length} events`;
+        document.querySelector("#events").textContent = JSON.stringify(events, null, 2);
+      } catch { status.textContent = "Local receiver unavailable. Check the demo server."; }
+    }, 1000);
+  </script>
+</body>
+</html>

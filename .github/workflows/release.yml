@@ -1,0 +1,135 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Commit or tag to preview (never publishes)
+        type: string
+        default: main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+      dist_tag: ${{ steps.metadata.outputs.dist_tag }}
+      tarball: ${{ steps.metadata.outputs.tarball }}
+      commit: ${{ steps.commit.outputs.sha }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.ref || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm install --global npm@11.19.1
+      - name: Record source commit
+        id: commit
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Require release commit on main
+        if: github.event_name == 'release'
+        run: git merge-base --is-ancestor HEAD origin/main
+      - name: Check release metadata
+        id: metadata
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_PRERELEASE: ${{ github.event.release.prerelease }}
+          IS_PREVIEW: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          if [ "$IS_PREVIEW" = "true" ]; then
+            node scripts/release.mjs --preview
+          else
+            node scripts/release.mjs
+          fi
+      - run: npm ci
+      - run: npm run check
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run test:browser
+      - name: Pack the tested SDK
+        run: |
+          mkdir -p release
+          npm pack --ignore-scripts --json --pack-destination release > release/manifest.json
+      - name: Preview npm publication
+        env:
+          TARBALL: ${{ steps.metadata.outputs.tarball }}
+          DIST_TAG: ${{ steps.metadata.outputs.dist_tag }}
+        run: npm publish "./release/$TARBALL" --dry-run --ignore-scripts --access public --tag "$DIST_TAG" --registry=https://registry.npmjs.org/
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: npm-package
+          path: release/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Summarize validated package
+        env:
+          VERSION: ${{ steps.metadata.outputs.version }}
+          DIST_TAG: ${{ steps.metadata.outputs.dist_tag }}
+        run: |
+          echo "Validated @probie-dev/web@$VERSION for the $DIST_TAG channel." >> "$GITHUB_STEP_SUMMARY"
+          echo "The npm-package artifact contains the tarball and its checksum manifest." >> "$GITHUB_STEP_SUMMARY"
+          echo "Manual workflow runs never publish to npm." >> "$GITHUB_STEP_SUMMARY"
+
+  publish:
+    if: github.event_name == 'release'
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ needs.prepare.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm install --global npm@11.19.1
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: npm-package
+          path: release
+      - name: Check for an identical published version
+        id: registry
+        run: node scripts/release.mjs registry
+      - name: Publish tested tarball through npm trusted publishing
+        if: steps.registry.outputs.already_published != 'true'
+        env:
+          TARBALL: ${{ needs.prepare.outputs.tarball }}
+          DIST_TAG: ${{ needs.prepare.outputs.dist_tag }}
+          NPM_CONFIG_PROVENANCE: ${{ !github.event.repository.private }}
+        run: npm publish "./release/$TARBALL" --ignore-scripts --access public --tag "$DIST_TAG" --registry=https://registry.npmjs.org/
+      - name: Verify published package integrity
+        run: node scripts/release.mjs registry --require-published
+
+  release-assets:
+    needs: [prepare, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: npm-package
+          path: release
+      - name: Attach package to the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          TARBALL: ${{ needs.prepare.outputs.tarball }}
+        run: gh release upload "$RELEASE_TAG" "release/$TARBALL" release/manifest.json --clobber
