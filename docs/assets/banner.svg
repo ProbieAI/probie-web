@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" role="img" aria-labelledby="title desc">
+<title id="title">Probie for JavaScript</title><desc id="desc">Browser signals, issue context, and fixes for review.</desc>
+<rect width="1280" height="420" rx="20" fill="#f1f6f3"/>
+<path d="M890 0V420M1030 0V420M1170 0V420M780 105H1280M780 210H1280M780 315H1280" stroke="#dfe9e3"/>
+<text x="64" y="72" fill="#2e8b7a" font-family="ui-monospace,monospace" font-size="17" letter-spacing="3">PROBIE / JAVASCRIPT</text>
+<text x="64" y="153" fill="#173c36" font-family="Arial,Helvetica,sans-serif" font-size="50" font-weight="700">Find friction.</text>
+<text x="64" y="216" fill="#173c36" font-family="Arial,Helvetica,sans-serif" font-size="50" font-weight="700">Ship improvements.</text>
+<text x="66" y="265" fill="#526a61" font-family="Arial,Helvetica,sans-serif" font-size="21">A small SDK. Less work for your team.</text>
+<rect x="64" y="316" width="485" height="48" rx="8" fill="#173c36"/>
+<text x="87" y="347" fill="#eaf4ef" font-family="ui-monospace,monospace" font-size="20">probie.dev/install</text>
+<rect x="824" y="76" width="384" height="272" rx="16" fill="#fff" stroke="#d7e4dc"/>
+<circle cx="858" cy="116" r="5" fill="#5bb8a9"/><text x="879" y="123" fill="#173c36" font-family="Arial,Helvetica,sans-serif" font-size="19">Browser signals</text>
+<path d="M858 133V178" stroke="#a2c7b9" stroke-width="2"/>
+<circle cx="858" cy="194" r="5" fill="#2e8b7a"/><text x="879" y="201" fill="#173c36" font-family="Arial,Helvetica,sans-serif" font-size="19">Issue context</text>
+<path d="M858 211V257" stroke="#a2c7b9" stroke-width="2"/>
+<circle cx="858" cy="273" r="5" fill="#173c36"/><text x="879" y="280" fill="#173c36" font-family="Arial,Helvetica,sans-serif" font-size="19">Fixes for review</text>
+<text x="851" y="323" fill="#6b8076" font-family="ui-monospace,monospace" font-size="13">SDK → Probie → your repository</text>
+</svg>

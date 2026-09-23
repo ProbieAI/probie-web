@@ -1,0 +1,13 @@
+# Changelog
+
+## Unreleased
+
+### Added
+
+- Standalone source distribution for `@probie-dev/web`.
+- Automatic JavaScript error, failed-request, navigation, click, form-friction,
+  and stuck-interface capture.
+- Explicit initialization, session identity, manual events, and flush helpers.
+- Session-scoped buffering, transient delivery retries, and stable event IDs.
+- ESM and CommonJS builds, TypeScript declarations, and source maps.
+- Framework guides, collection reference, local event inspector, and package checks.

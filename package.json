@@ -1,0 +1,98 @@
+{
+  "name": "@probie-dev/web",
+  "version": "0.1.0",
+  "description": "Capture browser errors, failed requests, and user friction in Probie.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist/index.js",
+    "dist/index.js.map",
+    "dist/index.cjs",
+    "dist/index.cjs.map",
+    "dist/index.d.ts",
+    "dist/index.d.ts.map",
+    "dist/collector.d.ts",
+    "dist/collector.d.ts.map",
+    "dist/overlay-evidence.d.ts",
+    "dist/overlay-evidence.d.ts.map",
+    "src/index.ts",
+    "src/collector.ts",
+    "src/overlay-evidence.ts",
+    "docs/README.md",
+    "docs/api.md",
+    "docs/compatibility.md",
+    "docs/data-collection.md",
+    "docs/frameworks.md",
+    "docs/hosted-script.md",
+    "docs/open-saas.md",
+    "docs/troubleshooting.md",
+    "docs/versioning.md",
+    "docs/assets/probie.svg",
+    "docs/assets/banner.svg",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "examples/README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ProbieAI/probie-web.git"
+  },
+  "homepage": "https://probie.dev",
+  "bugs": {
+    "url": "https://github.com/ProbieAI/probie-web/issues"
+  },
+  "keywords": [
+    "probie",
+    "browser",
+    "telemetry",
+    "analytics",
+    "observability",
+    "error-monitoring",
+    "rage-click",
+    "dead-click"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build:js": "esbuild src/index.ts --bundle --format=esm --platform=browser --target=es2018 --sourcemap --outfile=dist/index.js && esbuild src/index.ts --bundle --format=cjs --platform=browser --target=es2018 --sourcemap --outfile=dist/index.cjs",
+    "build:types": "tsc -p tsconfig.build.json",
+    "build": "npm run clean && npm run build:js && npm run build:types",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "npm run build && node --test test/*.test.mjs && vitest run",
+    "prepublishOnly": "npm run check",
+    "check": "npm run typecheck && npm test && node scripts/check-package.mjs",
+    "prepack": "npm run build",
+    "demo": "npm run build && node scripts/demo-server.mjs",
+    "test:browser": "npm run build && playwright test",
+    "size": "node scripts/size.mjs",
+    "release:check": "node scripts/release.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "typescript": "^5.7.2",
+    "vitest": "^5.0.1",
+    "vite": "^7.3.1",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^22.0.0"
+  }
+}
