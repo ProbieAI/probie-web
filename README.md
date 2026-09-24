@@ -96,8 +96,7 @@ to npm. See the [hosted script guide](docs/hosted-script.md) for configuration.
 ### Option 2: Use the npm package
 
 Use this option to import the SDK into your app and manage its version through
-your package manager. **Coming soon on npm.** Use the hosted script today.
-The package setup will be:
+your package manager:
 
 ```sh
 npm install @probie-dev/web
