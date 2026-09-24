@@ -23,6 +23,10 @@ For a preview, run **Actions → Release → Run workflow** with a commit or tag
 Download the `npm-package` artifact to inspect or install the tarball. Manual
 workflow runs never publish. Pushing a commit or tag alone also does not publish.
 
+Registry metadata may take several minutes to appear after a successful publish.
+The verification step allows up to ten minutes for propagation. If it still times
+out, wait for the version to appear on npm and rerun the failed jobs.
+
 If a workflow fails because of configuration, fix the configuration and rerun it.
 An already-published version with the identical checksum is safe to retry. If
 contents differ, prepare a new version; never move a published release tag.
