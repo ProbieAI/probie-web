@@ -62,7 +62,11 @@ jobs:
         run: |
           mkdir -p release
           npm pack --ignore-scripts --json --pack-destination release > release/manifest.json
+      - name: Check whether this exact package is already published
+        id: existing
+        run: node scripts/release.mjs registry
       - name: Preview npm publication
+        if: steps.existing.outputs.already_published != 'true'
         env:
           TARBALL: ${{ steps.metadata.outputs.tarball }}
           DIST_TAG: ${{ steps.metadata.outputs.dist_tag }}

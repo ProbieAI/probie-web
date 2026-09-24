@@ -1,6 +1,6 @@
 {
   "name": "@probie-dev/web",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Capture browser errors, failed requests, and user friction in Probie.",
   "license": "MIT",
   "type": "module",

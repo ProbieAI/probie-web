@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.1 - 2026-09-24
+
+### Fixed
+
+- Release automation now skips the npm dry run when an identical version is
+  already published and waits for registry propagation after publication.
+- Published through GitHub Actions with npm provenance. Browser runtime behavior
+  is unchanged from 0.1.0.
+
 ## 0.1.0 - 2026-09-24
 
 ### Added
